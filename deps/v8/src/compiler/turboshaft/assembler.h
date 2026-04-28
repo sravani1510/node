@@ -1834,7 +1834,7 @@ class AssemblerOpInterface : public Next {
     V<WordPtr> r = BitcastTaggedToWordPtrForTagAndSmiBits(resolve(right)); \
     if constexpr (kTaggedSize == kInt64Size) {                             \
       return IntPtrOpName(l, r);                                           \
-    } else {                                                               \
+    } else if constexpr (kTaggedSize == kInt32Size) {                                                               \
       static_assert(kTaggedSize == kInt32Size);                            \
       static_assert(v8::internal::SmiValuesAre31Bits());                   \
       return Int32OpName(TruncateWordPtrToWord32(l),                       \
