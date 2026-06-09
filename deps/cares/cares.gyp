@@ -52,6 +52,7 @@
       'src/lib/ares_sysconfig.c',
       'src/lib/ares_sysconfig_files.c',
       'src/lib/ares_sysconfig_mac.c',
+      'src/lib/ares_sysconfig_pase.c',
       'src/lib/ares_sysconfig_win.c',
       'src/lib/ares_timeout.c',
       'src/lib/ares_update_servers.c',
