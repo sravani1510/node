@@ -29,6 +29,8 @@
 #undef MAP_TYPE
 
 #include "src/base/macros.h"
+#include "src/base/lazy-instance.h"
+#include "src/base/platform/mutex.h"
 #include "src/base/platform/platform-posix.h"
 #include "src/base/platform/platform.h"
 
@@ -186,8 +188,16 @@ bool OS::DecommitPages(void* address, size_t size) {
   // address" errors
   // 4. Pages are inaccessible, preventing memory corruption
 
+  // To prevent the race condition, we use a mutex to ensure only one thread
+  // can execute this critical section at a time.
+  static LazyMutex decommit_mutex = LAZY_MUTEX_INITIALIZER;
+
   DCHECK_EQ(0, reinterpret_cast<uintptr_t>(address) % CommitPageSize());
   DCHECK_EQ(0, size % CommitPageSize());
+
+  // Lock the mutex to prevent race conditions
+  MutexGuard guard(decommit_mutex.Pointer());
+
   if (mprotect(address, size, PROT_NONE) != 0) return false;
   if (madvise(static_cast<caddr_t>(address), size, MADV_DONTNEED) != 0)
     return false;
