@@ -29,6 +29,8 @@
 #undef MAP_TYPE
 
 #include "src/base/macros.h"
+#include "src/base/lazy-instance.h"
+#include "src/base/platform/mutex.h"
 #include "src/base/platform/platform-posix.h"
 #include "src/base/platform/platform.h"
 
@@ -176,10 +178,17 @@ bool OS::DecommitPages(void* address, size_t size) {
   // the same address after the munmap but before the mmap, therefore a CHECK is
   // also added to assure the address is mapped successfully. Refer to the
   // comments under https://crrev.com/c/3010195 for more details.
+
+  // To prevent the race condition, we use a mutex to ensure only one thread
+  // can execute this critical section at a time.
+  static LazyMutex decommit_mutex = LAZY_MUTEX_INITIALIZER;
+
 #define MMAP() \
   mmap(address, size, PROT_NONE, MAP_FIXED | MAP_ANONYMOUS | MAP_PRIVATE, -1, 0)
   DCHECK_EQ(0, reinterpret_cast<uintptr_t>(address) % CommitPageSize());
   DCHECK_EQ(0, size % CommitPageSize());
+  // Lock the mutex to prevent race conditions
+  MutexGuard guard(decommit_mutex.Pointer());
   void* ptr;
   // Try without mapping first.
   ptr = MMAP();
