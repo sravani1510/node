@@ -144,6 +144,8 @@ test-inspector-network-websocket: SKIP
 test-tls-set-default-ca-certificates-append-fetch: SKIP
 test-tls-set-default-ca-certificates-reset-fetch: SKIP
 test-inspector-invalid-protocol: SKIP
+# fs.watch feature is not supported on IBMi
+test-vfs-real-provider-watch: SKIP
 
 [$asan==on]
 # https://github.com/nodejs/node/issues/39655
