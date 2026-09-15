@@ -92,7 +92,9 @@ const isLinux = process.platform === 'linux';
 }
 
 // Binding a privileged port without privilege throws EACCES synchronously.
-if (!common.isWindows && process.getuid() !== 0) {
+// On IBM i, the CI user may hold *IOSYSCFG special authority, which permits
+// binding privileged ports, so this assertion does not hold there.
+if (!common.isWindows && !common.isIBMi && process.getuid() !== 0) {
   assert.throws(() => new net.BoundSocket({ host: '127.0.0.1', port: 1 }), {
     code: 'EACCES',
     syscall: 'bind',

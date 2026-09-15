@@ -1,7 +1,7 @@
 // Flags: --no-warnings
 'use strict';
 
-require('../common');
+const common = require('../common');
 const assert = require('assert');
 const { spawnSync } = require('child_process');
 const fs = require('fs');
@@ -274,7 +274,10 @@ function run(script, args, options = undefined) {
   assert.doesNotMatch(result.stdout, /"binary","filename"/);
 }
 
-{
+// IBM i process spawning is significantly slower than Linux; scatter.js spawns
+// one child process per benchmark configuration (8 for buffer-compare-offset).
+// With a 30 s timeout per spawnSync call this block reliably times out on IBM i.
+if (!common.isIBMi) {
   const benchmark = path.resolve(
     __dirname, '../../benchmark/buffers/buffer-compare-offset.js');
   const nodeBenchmark = path.resolve(

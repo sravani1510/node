@@ -58,9 +58,9 @@ if (isMainThread) {
          `process did not abort, code:${cp.status} signal:${cp.signal}`);
 }
 
-// AIX keeps OpenSSL as V8's entropy source, so a DRBG that cannot be
+// AIX and IBM i keep OpenSSL as V8's entropy source, so a DRBG that cannot be
 // fetched still aborts at startup there.
-if (!common.isAIX) {
+if (!common.isAIX && !common.isIBMi) {
   // A configuration whose random section names a DRBG that cannot be
   // fetched starts normally; the first crypto call fails, without a hang.
   const fixtures = require('../common/fixtures');

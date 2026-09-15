@@ -6,6 +6,10 @@ const path = require('path');
 const { pathToFileURL } = require('url');
 const { isMainThread } = require('worker_threads');
 const isUnixLike = process.platform !== 'win32';
+// On IBM i IFS, fs.rmSync cannot remove directories whose object authority was
+// restricted (e.g. chmod 0o000) even as the owning user.  Fall back to the
+// shell `rm -rf` path which respects POSIX parent-directory write permission.
+const isIBMi = require('os').type() === 'OS400';
 let escapePOSIXShell;
 
 function rmSync(pathname, useSpawn) {
@@ -43,7 +47,7 @@ let tmpPath = path.join(testRoot, tmpdirName);
 
 let firstRefresh = true;
 function refresh(useSpawn = false) {
-  rmSync(tmpPath, useSpawn);
+  rmSync(tmpPath, useSpawn || isIBMi);
   fs.mkdirSync(tmpPath);
 
   if (firstRefresh) {
